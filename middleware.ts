@@ -38,13 +38,23 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/onboarding')
 
   // Unauthenticated user hitting a protected page → send to login
+  // Copy refreshed session cookies from supabaseResponse onto the redirect
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    const redirectResponse = NextResponse.redirect(new URL('/login', request.url))
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
   }
 
   // Authenticated user hitting an auth page → send to dashboard
+  // Copy refreshed session cookies from supabaseResponse onto the redirect
   if (user && isAuthPage) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url))
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
   }
 
   return supabaseResponse
