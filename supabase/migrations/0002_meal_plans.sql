@@ -78,3 +78,7 @@ create policy "Users can update own meal logs"
   on public.meal_logs for update using (auth.uid() = user_id);
 create policy "Users can delete own meal logs"
   on public.meal_logs for delete using (auth.uid() = user_id);
+
+create index meal_plans_user_id_idx on public.meal_plans(user_id);
+create index meal_plan_items_meal_plan_id_idx on public.meal_plan_items(meal_plan_id);
+create index meal_logs_user_id_idx on public.meal_logs(user_id);
