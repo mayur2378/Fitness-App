@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import StepBasicStats from '@/components/onboarding/step-basic-stats'
@@ -14,7 +14,8 @@ export default function OnboardingPage() {
   const [data, setData] = useState<Partial<OnboardingData>>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const isSubmitting = useRef(false)
 
   const handleNext = (stepData: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...stepData }))
@@ -22,21 +23,36 @@ export default function OnboardingPage() {
   }
 
   const handleSubmit = async (stepData: Partial<OnboardingData>) => {
-    const fullData = { ...data, ...stepData } as OnboardingData
+    if (isSubmitting.current) return
+    isSubmitting.current = true
     setSubmitError(null)
+    const fullData = { ...data, ...stepData }
+    const requiredKeys = [
+      'age', 'weight_kg', 'height_cm', 'goal',
+      'activity_level', 'experience_level', 'workout_days_per_week',
+    ] as const
+    const missing = requiredKeys.filter(k => fullData[k] === undefined)
+    if (missing.length > 0) {
+      isSubmitting.current = false
+      setSubmitError('Incomplete profile data. Please restart the wizard.')
+      return
+    }
+    const safeData = fullData as OnboardingData
 
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
+      isSubmitting.current = false
       setSubmitError('Session expired — please log in again.')
       return
     }
 
     const { error } = await supabase.from('profiles').insert({
       user_id: user.id,
-      ...fullData,
+      ...safeData,
     })
 
     if (error) {
+      isSubmitting.current = false
       setSubmitError('Could not save your profile. Please try again.')
       return
     }
@@ -65,13 +81,13 @@ export default function OnboardingPage() {
 
         <Card>
           <CardContent className="pt-6">
+            <p role="alert" aria-live="assertive" className="mt-3 text-sm text-destructive text-center min-h-[1.25rem]">
+              {submitError ?? ''}
+            </p>
             {step === 1 && <StepBasicStats onNext={handleNext} defaultValues={data} />}
             {step === 2 && <StepGoal onNext={handleNext} defaultValues={data} />}
             {step === 3 && <StepActivity onNext={handleNext} defaultValues={data} />}
             {step === 4 && <StepCuisine onSubmit={handleSubmit} defaultValues={data} />}
-            {submitError && (
-              <p role="alert" className="mt-3 text-sm text-destructive text-center">{submitError}</p>
-            )}
           </CardContent>
         </Card>
       </div>
