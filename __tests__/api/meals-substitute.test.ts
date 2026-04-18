@@ -23,7 +23,9 @@ function makeMockSupabase(user: { id: string } | null) {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({ data: MOCK_ITEM, error: null }),
+              eq: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({ data: MOCK_ITEM, error: null }),
+              }),
             }),
           }),
         }
@@ -86,5 +88,6 @@ describe('POST /api/meals/substitute', () => {
       body: JSON.stringify({ item_id: 'item-1' }),
     }))
     expect(res.status).toBe(500)
+    expect(await res.json()).toEqual({ error: 'No good substitute found — try again.' })
   })
 })

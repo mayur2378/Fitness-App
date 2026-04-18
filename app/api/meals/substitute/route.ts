@@ -17,8 +17,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const { data: item, error: itemError } = await supabase
     .from('meal_plan_items')
-    .select('*')
+    .select('*, meal_plans!inner(user_id)')
     .eq('id', body.item_id)
+    .eq('meal_plans.user_id', user.id)
     .single()
 
   if (itemError || !item) {
