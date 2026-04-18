@@ -1,6 +1,6 @@
 -- supabase/migrations/0001_profiles.sql
 
-create table profiles (
+create table public.profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null unique,
   age integer not null check (age between 13 and 120),
@@ -17,16 +17,34 @@ create table profiles (
   updated_at timestamptz not null default now()
 );
 
-alter table profiles enable row level security;
+-- Auto-update updated_at on row modification
+create or replace function public.handle_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create trigger set_profiles_updated_at
+  before update on public.profiles
+  for each row execute procedure public.handle_updated_at();
+
+-- Row Level Security
+alter table public.profiles enable row level security;
 
 create policy "Users can view own profile"
-  on profiles for select
+  on public.profiles for select
   using (auth.uid() = user_id);
 
 create policy "Users can insert own profile"
-  on profiles for insert
+  on public.profiles for insert
   with check (auth.uid() = user_id);
 
 create policy "Users can update own profile"
-  on profiles for update
+  on public.profiles for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own profile"
+  on public.profiles for delete
   using (auth.uid() = user_id);
