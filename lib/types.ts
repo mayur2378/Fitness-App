@@ -10,7 +10,7 @@ export interface Profile {
   weight_kg: number
   height_cm: number
   goal: Goal
-  target_weight_kg: number
+  target_weight_kg?: number
   activity_level: ActivityLevel
   experience_level: ExperienceLevel
   workout_days_per_week: number
@@ -20,15 +20,4 @@ export interface Profile {
   updated_at: string
 }
 
-export interface OnboardingData {
-  age: number
-  weight_kg: number
-  height_cm: number
-  goal: Goal
-  target_weight_kg: number
-  activity_level: ActivityLevel
-  experience_level: ExperienceLevel
-  workout_days_per_week: number
-  cuisine_preference: string
-  dietary_restrictions: string[]
-}
+export type OnboardingData = Omit<Profile, 'id' | 'user_id' | 'created_at' | 'updated_at'>
