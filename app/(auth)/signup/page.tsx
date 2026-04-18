@@ -23,7 +23,7 @@ export default function SignupPage() {
 
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) {
-      setError(error.message)
+      setError('Could not create account. Please try again.')
       setLoading(false)
     } else {
       router.push('/onboarding')
@@ -62,7 +62,7 @@ export default function SignupPage() {
                 autoComplete="new-password"
               />
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Creating account…' : 'Create account'}
             </Button>
