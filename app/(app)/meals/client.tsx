@@ -28,6 +28,7 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
   const [isGenerating, setIsGenerating] = useState(false)
   const [swappingId, setSwappingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
   const isGeneratingRef = useRef(false)
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
@@ -52,6 +53,8 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
   }
 
   const handleToggleEaten = async (item: MealPlanItem) => {
+    if (togglingId === item.id) return
+    setTogglingId(item.id)
     const today = new Date().toISOString().split('T')[0]
     const wasEaten = eatenIds.has(item.id)
     setEatenIds(prev => {
@@ -59,16 +62,31 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
       wasEaten ? next.delete(item.id) : next.add(item.id)
       return next
     })
-    if (wasEaten) {
-      await supabase.from('meal_logs').delete()
-        .eq('meal_plan_item_id', item.id).eq('date', today)
-    } else {
-      await supabase.from('meal_logs').insert({
-        user_id: userId, date: today, meal_plan_item_id: item.id,
-        name: item.name, calories: item.calories,
-        protein_g: item.protein_g, carbs_g: item.carbs_g, fat_g: item.fat_g,
-        eaten: true,
-      })
+    try {
+      let error: { message: string } | null = null
+      if (wasEaten) {
+        const result = await supabase.from('meal_logs').delete()
+          .eq('meal_plan_item_id', item.id).eq('date', today)
+        error = result.error
+      } else {
+        const result = await supabase.from('meal_logs').insert({
+          user_id: userId, date: today, meal_plan_item_id: item.id,
+          name: item.name, calories: item.calories,
+          protein_g: item.protein_g, carbs_g: item.carbs_g, fat_g: item.fat_g,
+          eaten: true,
+        })
+        error = result.error
+      }
+      if (error) {
+        setEatenIds(prev => {
+          const next = new Set(prev)
+          wasEaten ? next.add(item.id) : next.delete(item.id)
+          return next
+        })
+        setError('Could not save — please try again.')
+      }
+    } finally {
+      setTogglingId(null)
     }
   }
 
@@ -86,10 +104,14 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
         return
       }
       const { substitute } = await res.json()
-      await supabase.from('meal_plan_items').update({
+      const { error: updateError } = await supabase.from('meal_plan_items').update({
         name: substitute.name, calories: substitute.calories,
         protein_g: substitute.protein_g, carbs_g: substitute.carbs_g, fat_g: substitute.fat_g,
       }).eq('id', item.id)
+      if (updateError) {
+        setError('No good substitute found — try again.')
+        return
+      }
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, ...substitute } : i))
     } finally {
       setSwappingId(null)
