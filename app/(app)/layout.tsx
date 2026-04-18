@@ -5,14 +5,20 @@ import { createClient } from '@/lib/supabase/server'
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError) console.error('[AppLayout] auth.getUser error:', authError.message)
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
+
+  if (profileError) {
+    console.error('[AppLayout] profile query error:', profileError.message)
+    redirect('/login')
+  }
 
   if (!profile) redirect('/onboarding')
 
