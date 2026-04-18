@@ -23,9 +23,7 @@ describe('MealCell', () => {
 
   it('renders macro values', () => {
     render(<MealCell item={mockItem} isEaten={false} onToggleEaten={jest.fn()} onSwap={jest.fn()} isSwapping={false} />)
-    expect(screen.getByText(/12g/)).toBeInTheDocument()
-    expect(screen.getByText(/55g/)).toBeInTheDocument()
-    expect(screen.getByText(/8g/)).toBeInTheDocument()
+    expect(screen.getByText('P: 12g · C: 55g · F: 8g')).toBeInTheDocument()
   })
 
   it('calls onToggleEaten with the item when eaten button clicked', () => {
@@ -44,7 +42,7 @@ describe('MealCell', () => {
   it('calls onSwap with the item when swap button clicked', () => {
     const mockSwap = jest.fn()
     render(<MealCell item={mockItem} isEaten={false} onToggleEaten={jest.fn()} onSwap={mockSwap} isSwapping={false} />)
-    fireEvent.click(screen.getByRole('button', { name: /swap/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Swap meal' }))
     expect(mockSwap).toHaveBeenCalledWith(mockItem)
   })
 
