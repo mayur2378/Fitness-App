@@ -2,6 +2,9 @@
 export type Goal = 'lose' | 'gain' | 'maintain'
 export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced'
+export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+export type PlanStatus = 'proposed' | 'active' | 'archived'
 
 export interface Profile {
   id: string
@@ -21,3 +24,44 @@ export interface Profile {
 }
 
 export type OnboardingData = Omit<Profile, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+
+export interface CalorieTargets {
+  daily_calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+}
+
+export interface MealPlan {
+  id: string
+  user_id: string
+  week_start_date: string
+  status: PlanStatus
+  created_at: string
+}
+
+export interface MealPlanItem {
+  id: string
+  meal_plan_id: string
+  day_of_week: DayOfWeek
+  meal_type: MealType
+  name: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+}
+
+export interface MealLog {
+  id: string
+  user_id: string
+  date: string
+  meal_plan_item_id: string | null
+  name: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  eaten: boolean
+  created_at: string
+}
