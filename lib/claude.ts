@@ -7,6 +7,7 @@ export class ClaudeError extends Error {
   constructor(message: string, public readonly retriable: boolean) {
     super(message)
     this.name = 'ClaudeError'
+    Object.setPrototypeOf(this, ClaudeError.prototype)
   }
 }
 
