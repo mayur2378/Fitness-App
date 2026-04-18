@@ -61,13 +61,21 @@ describe('getCurrentWeekStart', () => {
     expect(date.getUTCDay()).toBe(1)
   })
 
-  it('returns correct Monday when given a Wednesday', () => {
-    // Wednesday 2026-04-22 → Monday 2026-04-20
-    const wednesday = new Date('2026-04-22T12:00:00')
-    const day = wednesday.getDay() // 3
-    const daysToMonday = day === 0 ? -6 : 1 - day
-    const monday = new Date(wednesday)
-    monday.setDate(wednesday.getDate() + daysToMonday)
-    expect(monday.toISOString().split('T')[0]).toBe('2026-04-20')
+  it('returns the correct Monday when called on a Wednesday', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-22T12:00:00'))
+    expect(getCurrentWeekStart()).toBe('2026-04-20')
+    jest.useRealTimers()
+  })
+
+  it('returns the previous Monday when called on a Sunday', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-19T12:00:00'))
+    expect(getCurrentWeekStart()).toBe('2026-04-13')
+    jest.useRealTimers()
+  })
+
+  it('returns the same Monday when called on a Monday', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-20T12:00:00'))
+    expect(getCurrentWeekStart()).toBe('2026-04-20')
+    jest.useRealTimers()
   })
 })
