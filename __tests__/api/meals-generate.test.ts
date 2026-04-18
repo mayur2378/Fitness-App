@@ -48,7 +48,7 @@ function makeMockSupabase(overrides: Record<string, unknown> = {}) {
       }
       if (table === 'meal_plans') {
         return {
-          update: jest.fn().mockReturnValue({ eq: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) }) }),
+          update: jest.fn().mockReturnValue({ eq: jest.fn().mockReturnValue({ eq: jest.fn().mockReturnValue({ neq: jest.fn().mockResolvedValue({ error: null }) }) }) }),
           insert: jest.fn().mockReturnValue({ select: jest.fn().mockReturnValue({ single: jest.fn().mockResolvedValue({ data: mockPlan, error: null }) }) }),
           delete: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) }),
         }

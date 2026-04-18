@@ -81,14 +81,7 @@ Rules:
     return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
   }
 
-  // Step 3: archive existing active plans
-  await supabase
-    .from('meal_plans')
-    .update({ status: 'archived' })
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-
-  // Step 4: insert new meal plan
+  // Step 3: insert new meal plan
   const { data: mealPlan, error: planInsertError } = await supabase
     .from('meal_plans')
     .insert({ user_id: user.id, week_start_date: getCurrentWeekStart(), status: 'active' })
@@ -99,7 +92,7 @@ Rules:
     return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
   }
 
-  // Step 5: insert items
+  // Step 4: insert items
   const items = days.flatMap(d =>
     d.meals.map(meal => ({
       meal_plan_id: mealPlan.id,
@@ -120,6 +113,14 @@ Rules:
     await supabase.from('meal_plans').delete().eq('id', mealPlan.id)
     return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
   }
+
+  // Step 5: archive previous active plans now that the new plan is fully saved
+  await supabase
+    .from('meal_plans')
+    .update({ status: 'archived' })
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .neq('id', mealPlan.id)
 
   return NextResponse.json({ plan: mealPlan, items, targets })
 }
