@@ -33,8 +33,11 @@ export default function StepCuisine({ onSubmit, defaultValues }: Props) {
       .map(s => s.trim())
       .filter(Boolean)
 
-    await onSubmit({ cuisine_preference: cuisine.trim(), dietary_restrictions })
-    setLoading(false)
+    try {
+      await onSubmit({ cuisine_preference: cuisine.trim(), dietary_restrictions })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

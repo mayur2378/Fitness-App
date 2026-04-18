@@ -20,9 +20,9 @@ export default function StepBasicStats({ onNext, defaultValues }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
-    const ageErr = validateAge(Number(age))
-    const weightErr = validateWeight(Number(weightKg))
-    const heightErr = validateHeight(Number(heightCm))
+    const ageErr = validateAge(age === '' ? NaN : age)
+    const weightErr = validateWeight(weightKg === '' ? NaN : weightKg)
+    const heightErr = validateHeight(heightCm === '' ? NaN : heightCm)
     if (ageErr) newErrors.age = ageErr
     if (weightErr) newErrors.weight_kg = weightErr
     if (heightErr) newErrors.height_cm = heightErr

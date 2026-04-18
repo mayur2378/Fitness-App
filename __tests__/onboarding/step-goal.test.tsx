@@ -15,7 +15,7 @@ describe('StepGoal', () => {
   it('shows validation error for missing target weight', async () => {
     render(<StepGoal onNext={mockOnNext} defaultValues={{}} />)
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(await screen.findByText(/target weight/i)).toBeInTheDocument()
+    expect(await screen.findByText(/target weight is required/i)).toBeInTheDocument()
     expect(mockOnNext).not.toHaveBeenCalled()
   })
 

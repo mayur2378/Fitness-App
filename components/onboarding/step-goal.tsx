@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { validateTargetWeight } from '@/lib/validation'
 import type { Goal, OnboardingData } from '@/lib/types'
 
@@ -18,7 +19,7 @@ export default function StepGoal({ onNext, defaultValues }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
-    const err = validateTargetWeight(Number(targetWeight))
+    const err = validateTargetWeight(targetWeight === '' ? NaN : targetWeight)
     if (err) newErrors.target_weight_kg = err
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
@@ -29,7 +30,7 @@ export default function StepGoal({ onNext, defaultValues }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-semibold">Your goal</h2>
       <div className="space-y-1">
-        <label htmlFor="goal" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Goal</label>
+        <Label htmlFor="goal">Goal</Label>
         <select
           id="goal"
           value={goal}

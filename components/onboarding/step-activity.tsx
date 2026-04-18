@@ -26,7 +26,7 @@ export default function StepActivity({ onNext, defaultValues }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
-    const err = validateWorkoutDays(Number(workoutDays))
+    const err = validateWorkoutDays(workoutDays === '' ? NaN : workoutDays)
     if (err) newErrors.workout_days_per_week = err
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
