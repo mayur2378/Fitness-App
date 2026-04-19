@@ -67,3 +67,52 @@ export interface MealLog {
   eaten: boolean
   created_at: string
 }
+
+export interface WorkoutPlan {
+  id: string
+  user_id: string
+  week_start_date: string
+  status: PlanStatus
+  created_at: string
+}
+
+export interface Exercise {
+  name: string
+  sets: number
+  reps: number
+  weight_kg: number
+}
+
+export interface WorkoutPlanItem {
+  id: string
+  workout_plan_id: string
+  day_of_week: DayOfWeek
+  name: string
+  exercises: Exercise[]
+}
+
+export interface ExerciseLog {
+  name: string
+  actual_sets: number
+  actual_reps: number
+  actual_weight_kg: number
+}
+
+export interface WorkoutLog {
+  id: string
+  user_id: string
+  date: string
+  workout_plan_item_id: string | null
+  completed: boolean
+  exercises_logged: ExerciseLog[]
+  notes: string | null
+  created_at: string
+}
+
+export interface WorkoutLogPayload {
+  workout_plan_item_id: string
+  date: string
+  completed: boolean
+  exercises_logged: ExerciseLog[]
+  notes: string
+}
