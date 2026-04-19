@@ -53,7 +53,7 @@ export default function StepActivity({ onNext, defaultValues }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold">Activity &amp; experience</h2>
+        <h2 className="text-xl font-display font-bold">Activity &amp; experience</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Helps us calibrate your calorie burn</p>
       </div>
 

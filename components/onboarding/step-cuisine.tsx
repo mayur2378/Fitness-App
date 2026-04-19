@@ -43,7 +43,7 @@ export default function StepCuisine({ onSubmit, defaultValues }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold">Food preferences</h2>
+        <h2 className="text-xl font-display font-bold">Food preferences</h2>
         <p className="text-sm text-muted-foreground mt-0.5">We&apos;ll tailor your meal plans to these</p>
       </div>
 

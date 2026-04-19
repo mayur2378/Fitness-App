@@ -26,21 +26,21 @@ export default function StepGoal({ onNext, defaultValues }: Props) {
     onNext({ goal, target_weight_kg: Number(targetWeight) })
   }
 
-  const GOALS: { value: Goal; label: string; description: string; icon: string }[] = [
-    { value: 'lose', label: 'Lose weight', description: 'Calorie deficit + meal plans', icon: '🔥' },
-    { value: 'maintain', label: 'Maintain', description: 'Balanced calorie target', icon: '⚖️' },
-    { value: 'gain', label: 'Gain muscle', description: 'Calorie surplus for growth', icon: '💪' },
+  const GOALS: { value: Goal; label: string; description: string }[] = [
+    { value: 'lose', label: 'Lose weight', description: 'Calorie deficit + meal plans' },
+    { value: 'maintain', label: 'Maintain', description: 'Balanced calorie target' },
+    { value: 'gain', label: 'Gain muscle', description: 'Calorie surplus for growth' },
   ]
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold">Your goal</h2>
+        <h2 className="text-xl font-display font-bold">Your goal</h2>
         <p className="text-sm text-muted-foreground mt-0.5">This shapes your calorie deficit or surplus</p>
       </div>
 
       <div className="space-y-2">
-        {GOALS.map(({ value, label, description, icon }) => (
+        {GOALS.map(({ value, label, description }) => (
           <button
             key={value}
             type="button"
@@ -51,7 +51,6 @@ export default function StepGoal({ onNext, defaultValues }: Props) {
                 : 'border-input hover:border-primary/30 hover:bg-muted/40'
             }`}
           >
-            <span className="text-2xl shrink-0">{icon}</span>
             <div>
               <p className={`text-sm font-semibold ${goal === value ? 'text-primary' : ''}`}>{label}</p>
               <p className="text-xs text-muted-foreground">{description}</p>

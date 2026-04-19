@@ -35,7 +35,7 @@ export default function StepBasicStats({ onNext, defaultValues }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold">Your stats</h2>
+        <h2 className="text-xl font-display font-bold">Your stats</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Used to calculate your calorie targets</p>
       </div>
 

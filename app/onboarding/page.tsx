@@ -67,8 +67,8 @@ export default function OnboardingPage() {
     <div className="min-h-screen grid lg:grid-cols-[280px_1fr]">
       {/* Brand panel */}
       <div className="hidden lg:flex flex-col justify-between bg-primary p-10 text-primary-foreground">
-        <div className="flex items-center gap-2 text-xl font-bold">
-          <span className="text-2xl">⚡</span> FitAI
+        <div className="flex items-center gap-2 text-xl font-display font-bold">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" /></svg> FitAI
         </div>
         <div className="space-y-6">
           <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function OnboardingPage() {
                         ? 'bg-primary-foreground/30 text-primary-foreground ring-2 ring-primary-foreground'
                         : 'bg-primary-foreground/10 text-primary-foreground/40'
                   }`}>
-                    {i + 1 < step ? '✓' : i + 1}
+                    {i + 1 < step ? <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="1.5,5 3.5,7.5 8.5,2.5" /></svg> : i + 1}
                   </div>
                   <span className={`text-sm ${i + 1 === step ? 'font-semibold' : 'text-primary-foreground/60'}`}>
                     {label}
@@ -107,7 +107,7 @@ export default function OnboardingPage() {
           {/* Mobile header */}
           <div className="lg:hidden space-y-3">
             <div className="flex items-center gap-2 text-xl font-bold">
-              <span>⚡</span> FitAI
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" /></svg> FitAI
             </div>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4].map(i => (

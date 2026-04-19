@@ -30,14 +30,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-[5fr_7fr]">
       {/* Brand panel */}
       <div className="hidden lg:flex flex-col justify-between bg-primary p-12 text-primary-foreground">
         <div className="flex items-center gap-2 text-xl font-bold">
-          <span className="text-2xl">⚡</span> FitAI
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" />
+          </svg>
+          FitAI
         </div>
         <div className="space-y-3">
-          <h1 className="text-4xl font-bold leading-tight">
+          <h1 className="text-4xl font-display font-bold leading-tight">
             Your AI-powered fitness companion
           </h1>
           <p className="text-primary-foreground/70 text-lg">
@@ -52,9 +55,12 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xl font-bold lg:hidden mb-6">
-              <span>⚡</span> FitAI
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" />
+              </svg>
+              FitAI
             </div>
-            <h2 className="text-2xl font-bold">Welcome back</h2>
+            <h2 className="text-2xl font-display font-bold">Welcome back</h2>
             <p className="text-muted-foreground text-sm">Sign in to your account to continue</p>
           </div>
 

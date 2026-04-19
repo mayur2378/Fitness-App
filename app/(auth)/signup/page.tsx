@@ -30,14 +30,17 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-[5fr_7fr]">
       {/* Brand panel */}
       <div className="hidden lg:flex flex-col justify-between bg-primary p-12 text-primary-foreground">
         <div className="flex items-center gap-2 text-xl font-bold">
-          <span className="text-2xl">⚡</span> FitAI
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" />
+          </svg>
+          FitAI
         </div>
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold leading-tight">
+          <h1 className="text-4xl font-display font-bold leading-tight">
             Start your transformation today
           </h1>
           <ul className="space-y-2 text-primary-foreground/80">
@@ -47,7 +50,10 @@ export default function SignupPage() {
               'Automatic weekly plan adjustments',
             ].map(item => (
               <li key={item} className="flex items-center gap-2 text-sm">
-                <span className="text-lg">✓</span> {item}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5" aria-hidden="true">
+                  <polyline points="2,7 5.5,10.5 12,3.5" />
+                </svg>
+                {item}
               </li>
             ))}
           </ul>
@@ -60,9 +66,12 @@ export default function SignupPage() {
         <div className="w-full max-w-sm space-y-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xl font-bold lg:hidden mb-6">
-              <span>⚡</span> FitAI
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" />
+              </svg>
+              FitAI
             </div>
-            <h2 className="text-2xl font-bold">Create your account</h2>
+            <h2 className="text-2xl font-display font-bold">Create your account</h2>
             <p className="text-muted-foreground text-sm">Free to use. No credit card required.</p>
           </div>
 
