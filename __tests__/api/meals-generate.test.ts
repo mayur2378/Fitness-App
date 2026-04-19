@@ -13,12 +13,13 @@ const mockCreateClient = createClient as jest.MockedFunction<typeof createClient
 const mockCallClaude = callClaude as jest.MockedFunction<typeof callClaude>
 
 const MOCK_PROFILE = {
-  age: 28, weight_kg: 75, height_cm: 175, goal: 'lose',
+  sex: 'male', age: 28, weight_kg: 75, height_cm: 175, goal: 'lose',
   activity_level: 'moderately_active', cuisine_preference: 'Indian',
   dietary_restrictions: ['no fish'],
 }
 
-const MOCK_TARGETS = { daily_calories: 1900, protein_g: 165, carbs_g: 191, fat_g: 53 }
+// Matches calculateCalorieTargets({ sex:'male', age:28, weight_kg:75, height_cm:175, goal:'lose', activity_level:'moderately_active' })
+const MOCK_TARGETS = { daily_calories: 2349, protein_g: 150, carbs_g: 291, fat_g: 65, bmi: 24.5, bmi_category: 'normal' }
 
 const MOCK_PLAN_DAYS = [
   {
@@ -75,9 +76,8 @@ describe('POST /api/meals/generate', () => {
 
   it('generates and returns meal plan on success', async () => {
     mockCreateClient.mockResolvedValue(makeMockSupabase() as never)
-    mockCallClaude
-      .mockResolvedValueOnce(JSON.stringify(MOCK_TARGETS))
-      .mockResolvedValueOnce(JSON.stringify(MOCK_PLAN_DAYS))
+    // Route now calls Claude once (for meals only — calorie targets computed in code)
+    mockCallClaude.mockResolvedValueOnce(JSON.stringify(MOCK_PLAN_DAYS))
 
     const res = await POST(new Request('http://localhost/api/meals/generate', { method: 'POST' }))
     expect(res.status).toBe(200)
@@ -89,9 +89,7 @@ describe('POST /api/meals/generate', () => {
 
   it('returns 500 when Claude returns invalid JSON for meal plan', async () => {
     mockCreateClient.mockResolvedValue(makeMockSupabase() as never)
-    mockCallClaude
-      .mockResolvedValueOnce(JSON.stringify(MOCK_TARGETS))
-      .mockResolvedValueOnce('not json')
+    mockCallClaude.mockResolvedValueOnce('not json')
     const res = await POST(new Request('http://localhost/api/meals/generate', { method: 'POST' }))
     expect(res.status).toBe(500)
     expect(await res.json()).toEqual({ error: 'Plan generation failed — try again.' })

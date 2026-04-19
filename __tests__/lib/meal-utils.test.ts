@@ -56,9 +56,11 @@ describe('getCurrentWeekStart', () => {
   })
 
   it('returns a Monday (day index 1)', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-22T12:00:00')) // Wednesday noon
     const result = getCurrentWeekStart()
     const date = new Date(result + 'T00:00:00Z')
     expect(date.getUTCDay()).toBe(1)
+    jest.useRealTimers()
   })
 
   it('returns the correct Monday when called on a Wednesday', () => {

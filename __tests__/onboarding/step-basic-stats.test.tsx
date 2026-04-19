@@ -17,7 +17,7 @@ describe('StepBasicStats', () => {
   it('shows validation error for invalid age', async () => {
     render(<StepBasicStats onNext={mockOnNext} defaultValues={{}} />)
     await userEvent.type(screen.getByLabelText(/age/i), '5')
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
     expect(await screen.findByText(/age must be between/i)).toBeInTheDocument()
     expect(mockOnNext).not.toHaveBeenCalled()
   })
@@ -27,8 +27,8 @@ describe('StepBasicStats', () => {
     await userEvent.type(screen.getByLabelText(/age/i), '28')
     await userEvent.type(screen.getByLabelText(/weight/i), '75')
     await userEvent.type(screen.getByLabelText(/height/i), '175')
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(mockOnNext).toHaveBeenCalledWith({ age: 28, weight_kg: 75, height_cm: 175 })
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+    expect(mockOnNext).toHaveBeenCalledWith({ sex: 'male', age: 28, weight_kg: 75, height_cm: 175 })
   })
 
   it('pre-fills fields from defaultValues', () => {

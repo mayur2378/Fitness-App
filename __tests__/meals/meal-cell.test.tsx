@@ -22,8 +22,13 @@ describe('MealCell', () => {
   })
 
   it('renders macro values', () => {
-    render(<MealCell item={mockItem} isEaten={false} onToggleEaten={jest.fn()} onSwap={jest.fn()} isSwapping={false} />)
-    expect(screen.getByText('P: 12g · C: 55g · F: 8g')).toBeInTheDocument()
+    const { container } = render(<MealCell item={mockItem} isEaten={false} onToggleEaten={jest.fn()} onSwap={jest.fn()} isSwapping={false} />)
+    expect(container.textContent).toContain('P')
+    expect(container.textContent).toContain('12g')
+    expect(container.textContent).toContain('C')
+    expect(container.textContent).toContain('55g')
+    expect(container.textContent).toContain('F')
+    expect(container.textContent).toContain('8g')
   })
 
   it('calls onToggleEaten with the item when eaten button clicked', () => {

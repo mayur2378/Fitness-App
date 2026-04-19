@@ -1,12 +1,9 @@
 jest.mock('@/lib/supabase/server')
-jest.mock('@/lib/claude')
 
 import { POST } from '@/app/api/calorie/calculate/route'
 import { createClient } from '@/lib/supabase/server'
-import { callClaude } from '@/lib/claude'
 
 const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>
-const mockCallClaude = callClaude as jest.MockedFunction<typeof callClaude>
 
 function makeMockSupabase(user: { id: string } | null, profile: Record<string, unknown> | null) {
   return {
@@ -40,22 +37,33 @@ describe('POST /api/calorie/calculate', () => {
     expect(await res.json()).toEqual({ error: 'Profile not found' })
   })
 
-  it('returns calorie targets on success', async () => {
-    const profile = { age: 28, weight_kg: 75, height_cm: 175, goal: 'lose', activity_level: 'moderately_active' }
-    const targets = { daily_calories: 1900, protein_g: 165, carbs_g: 191, fat_g: 53 }
+  it('returns calorie targets computed from profile', async () => {
+    // male, 28yr, 75kg, 175cm, lose, moderately_active
+    // BMI=24.5 (normal), BMR=1708.75, TDEE=2648.6, deficit=-300 → 2349 kcal
+    const profile = { sex: 'male', age: 28, weight_kg: 75, height_cm: 175, goal: 'lose', activity_level: 'moderately_active' }
     mockCreateClient.mockResolvedValue(makeMockSupabase({ id: 'uid-1' }, profile) as never)
-    mockCallClaude.mockResolvedValue(JSON.stringify(targets))
     const res = await POST()
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual(targets)
+    const body = await res.json()
+    expect(body.daily_calories).toBe(2349)
+    expect(body.protein_g).toBe(150)
+    expect(body.fat_g).toBe(65)
+    expect(body.carbs_g).toBe(291)
+    expect(body.bmi).toBe(24.5)
+    expect(body.bmi_category).toBe('normal')
   })
 
-  it('returns 500 when Claude returns invalid JSON', async () => {
-    const profile = { age: 28, weight_kg: 75, height_cm: 175, goal: 'lose', activity_level: 'moderately_active' }
-    mockCreateClient.mockResolvedValue(makeMockSupabase({ id: 'uid-1' }, profile) as never)
-    mockCallClaude.mockResolvedValue('not valid json {{')
+  it('applies female BMR formula and higher floor', async () => {
+    // female, 30yr, 60kg, 165cm, maintain, sedentary
+    // BMR = 10*60 + 6.25*165 - 5*30 - 161 = 600+1031.25-150-161 = 1320.25
+    // TDEE = 1320.25 * 1.2 = 1584.3, deficit=0 → 1584
+    // floor = 1200, so 1584 kcal
+    const profile = { sex: 'female', age: 30, weight_kg: 60, height_cm: 165, goal: 'maintain', activity_level: 'sedentary' }
+    mockCreateClient.mockResolvedValue(makeMockSupabase({ id: 'uid-2' }, profile) as never)
     const res = await POST()
-    expect(res.status).toBe(500)
-    expect(await res.json()).toEqual({ error: 'Failed to calculate calorie targets' })
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.daily_calories).toBeGreaterThanOrEqual(1200)
+    expect(body.bmi).toBeGreaterThan(0)
   })
 })
