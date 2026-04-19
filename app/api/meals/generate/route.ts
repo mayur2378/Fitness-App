@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { callClaude } from '@/lib/claude'
 import { getCurrentWeekStart } from '@/lib/meal-utils'
-import type { CalorieTargets, DayOfWeek, MealType } from '@/lib/types'
+import { calculateCalorieTargets } from '@/lib/calorie-utils'
+import type { DayOfWeek, MealType } from '@/lib/types'
+
+function stripCodeFences(raw: string): string {
+  return raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+}
+
 
 type DayPayload = {
   day: string
@@ -19,7 +25,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('age, weight_kg, height_cm, goal, activity_level, cuisine_preference, dietary_restrictions')
+    .select('sex, age, weight_kg, height_cm, goal, activity_level, cuisine_preference, dietary_restrictions')
     .eq('user_id', user.id)
     .single()
 
@@ -27,57 +33,42 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   }
 
-  // Step 1: get calorie targets
-  let targets: CalorieTargets
-  try {
-    const caloriePrompt = `Calculate the daily calorie target and macro split for this user.
-
-Age: ${profile.age} years
-Weight: ${profile.weight_kg} kg
-Height: ${profile.height_cm} cm
-Goal: ${profile.goal} (lose=fat loss -400 kcal, gain=muscle +300 kcal, maintain=0)
-Activity level: ${profile.activity_level}
-
-Use Mifflin-St Jeor formula (male baseline: BMR = 10×weight + 6.25×height - 5×age + 5).
-Activity multipliers: sedentary=1.2, lightly_active=1.375, moderately_active=1.55, very_active=1.725
-Macros: protein=2g/kg body weight, fat=25% of total calories, carbs=remaining calories.
-Round all values to the nearest integer.
-
-Respond with ONLY a JSON object, no markdown:
-{"daily_calories":0,"protein_g":0,"carbs_g":0,"fat_g":0}`
-
-    const calorieRaw = await callClaude(caloriePrompt, 256)
-    targets = JSON.parse(calorieRaw)
-  } catch {
-    return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
-  }
+  // Step 1: calculate calorie targets in code
+  const targets = calculateCalorieTargets(profile)
+  console.log('[generate] targets:', targets)
 
   // Step 2: generate 7-day meal plan
   const restrictions = profile.dietary_restrictions?.length > 0
     ? profile.dietary_restrictions.join(', ')
     : 'none'
 
-  const mealPrompt = `Generate a 7-day meal plan.
+  const mealPrompt = `You are a meal planner. Output ONLY a JSON array with no other text, explanation, or markdown.
 
-Daily targets: ${targets.daily_calories} kcal | Protein: ${targets.protein_g}g | Carbs: ${targets.carbs_g}g | Fat: ${targets.fat_g}g
-Cuisine preference: ${profile.cuisine_preference}
-Dietary restrictions: ${restrictions}
+CALORIE BUDGET: ${targets.daily_calories} kcal per day (MAXIMUM — do NOT exceed this)
+- BMI category: ${targets.bmi_category} (BMI ${targets.bmi})
+- Protein target: ${targets.protein_g}g | Fat: ${targets.fat_g}g | Carbs: ${targets.carbs_g}g
+- Cuisine: ${profile.cuisine_preference}
+- Dietary restrictions: ${restrictions}
 
-Return ONLY a JSON array, no markdown:
-[{"day":"mon","meals":[{"meal_type":"breakfast","name":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0},{"meal_type":"lunch",...},{"meal_type":"dinner",...},{"meal_type":"snack",...}]},... repeat for tue,wed,thu,fri,sat,sun]
+RULES (non-negotiable):
+1. Exactly 7 days: mon, tue, wed, thu, fri, sat, sun
+2. Exactly 4 meals per day: breakfast, lunch, dinner, snack
+3. Sum of meal calories per day MUST be ≤ ${targets.daily_calories} kcal (stay within 50 kcal below max)
+4. Strictly honor all dietary restrictions
+5. Use specific dish names (e.g. "Masala Oats with Spinach" not "Oatmeal")
+6. Prefer ${profile.cuisine_preference} cuisine
 
-Rules:
-- Each day has exactly 4 meals: breakfast, lunch, dinner, snack
-- Total daily calories within ±50 kcal of the target
-- Strictly honor all dietary restrictions
-- Use specific, descriptive dish names (e.g. "Masala Oats with Spinach" not just "Oatmeal")
-- Meals should be primarily ${profile.cuisine_preference} cuisine`
+Output this exact JSON array with no other text before or after:
+[{"day":"mon","meals":[{"meal_type":"breakfast","name":"Dish Name","calories":350,"protein_g":12,"carbs_g":55,"fat_g":8},{"meal_type":"lunch","name":"Dish Name","calories":500,"protein_g":30,"carbs_g":60,"fat_g":12},{"meal_type":"dinner","name":"Dish Name","calories":550,"protein_g":35,"carbs_g":55,"fat_g":15},{"meal_type":"snack","name":"Dish Name","calories":120,"protein_g":6,"carbs_g":15,"fat_g":3}]},{"day":"tue","meals":[...]},{"day":"wed","meals":[...]},{"day":"thu","meals":[...]},{"day":"fri","meals":[...]},{"day":"sat","meals":[...]},{"day":"sun","meals":[...]}]`
 
   let days: DayPayload[]
   try {
     const planRaw = await callClaude(mealPrompt, 4096)
-    days = JSON.parse(planRaw)
-  } catch {
+    console.log('[generate] raw meal plan (first 300 chars):', planRaw.slice(0, 300))
+    days = JSON.parse(stripCodeFences(planRaw))
+    console.log('[generate] parsed days count:', days.length, '| first day meals:', days[0]?.meals?.length)
+  } catch (err) {
+    console.error('[generate] meal plan step failed:', err)
     return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
   }
 
@@ -89,6 +80,7 @@ Rules:
     .single()
 
   if (planInsertError || !mealPlan) {
+    console.error('[generate] plan insert failed:', planInsertError)
     return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
   }
 
@@ -106,10 +98,11 @@ Rules:
     }))
   )
 
+  console.log('[generate] inserting items count:', items.length)
   const { error: itemsError } = await supabase.from('meal_plan_items').insert(items)
 
   if (itemsError) {
-    // Rollback: delete the plan row to avoid leaving an empty plan
+    console.error('[generate] items insert failed:', itemsError)
     await supabase.from('meal_plans').delete().eq('id', mealPlan.id)
     return NextResponse.json({ error: 'Plan generation failed — try again.' }, { status: 500 })
   }

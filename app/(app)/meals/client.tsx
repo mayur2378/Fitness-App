@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import MealCell from '@/components/meals/meal-cell'
 import { Button } from '@/components/ui/button'
 import { buildMealGrid } from '@/lib/meal-utils'
-import type { MealPlan, MealPlanItem, MealType, DayOfWeek } from '@/lib/types'
+import type { MealPlan, MealPlanItem, MealType, DayOfWeek, CalorieTargets } from '@/lib/types'
 
 const DAYS: { key: DayOfWeek; label: string }[] = [
   { key: 'mon', label: 'Mon' }, { key: 'tue', label: 'Tue' },
@@ -20,9 +20,10 @@ interface Props {
   items: MealPlanItem[]
   eatenItemIds: string[]
   userId: string
+  targets: (CalorieTargets & { bmi: number; bmi_category: string }) | null
 }
 
-export default function MealsClient({ activePlan, items: initialItems, eatenItemIds, userId }: Props) {
+export default function MealsClient({ activePlan, items: initialItems, eatenItemIds, userId, targets }: Props) {
   const [items, setItems] = useState(initialItems)
   const [eatenIds, setEatenIds] = useState<Set<string>>(new Set(eatenItemIds))
   const [isGenerating, setIsGenerating] = useState(false)
@@ -130,6 +131,21 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
       <p role="alert" aria-live="assertive" className="text-sm text-destructive min-h-[1.25rem]">
         {error ?? ''}
       </p>
+
+      {targets && (
+        <div className="rounded-lg border bg-card p-3 space-y-2 text-sm">
+          <div className="flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
+            <span className="font-medium">Daily calorie budget</span>
+            <span className="text-lg font-bold text-primary">{targets.daily_calories} kcal</span>
+          </div>
+          <div className="flex gap-4 text-xs text-muted-foreground flex-wrap">
+            <span>Protein <span className="font-medium text-foreground">{targets.protein_g}g</span></span>
+            <span>Carbs <span className="font-medium text-foreground">{targets.carbs_g}g</span></span>
+            <span>Fat <span className="font-medium text-foreground">{targets.fat_g}g</span></span>
+            <span className="ml-auto">BMI <span className="font-medium text-foreground">{targets.bmi}</span> ({targets.bmi_category})</span>
+          </div>
+        </div>
+      )}
 
       {!activePlan ? (
         <p className="text-muted-foreground text-sm">

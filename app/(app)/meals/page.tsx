@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { calculateCalorieTargets } from '@/lib/calorie-utils'
 import MealsClient from './client'
 
 export default async function MealsPage() {
@@ -7,6 +8,14 @@ export default async function MealsPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('sex, age, weight_kg, height_cm, goal, activity_level')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const targets = profile ? calculateCalorieTargets(profile) : null
 
   const { data: activePlan } = await supabase
     .from('meal_plans')
@@ -39,10 +48,12 @@ export default async function MealsPage() {
 
   return (
     <MealsClient
+      key={activePlan?.id ?? 'no-plan'}
       activePlan={activePlan}
       items={items}
       eatenItemIds={eatenItemIds}
       userId={user.id}
+      targets={targets}
     />
   )
 }

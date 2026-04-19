@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -20,7 +19,6 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
@@ -32,25 +30,49 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign in</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* Brand panel */}
+      <div className="hidden lg:flex flex-col justify-between bg-primary p-12 text-primary-foreground">
+        <div className="flex items-center gap-2 text-xl font-bold">
+          <span className="text-2xl">⚡</span> FitAI
+        </div>
+        <div className="space-y-3">
+          <h1 className="text-4xl font-bold leading-tight">
+            Your AI-powered fitness companion
+          </h1>
+          <p className="text-primary-foreground/70 text-lg">
+            Personalised meal plans and workouts that adapt every week based on your progress.
+          </p>
+        </div>
+        <p className="text-primary-foreground/50 text-sm">© 2026 FitAI</p>
+      </div>
+
+      {/* Form panel */}
+      <div className="flex items-center justify-center p-8">
+        <div className="w-full max-w-sm space-y-8">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xl font-bold lg:hidden mb-6">
+              <span>⚡</span> FitAI
+            </div>
+            <h2 className="text-2xl font-bold">Welcome back</h2>
+            <p className="text-muted-foreground text-sm">Sign in to your account to continue</p>
+          </div>
+
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
+                placeholder="you@example.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                className="h-11"
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -59,21 +81,25 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
+                className="h-11"
               />
             </div>
-            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full">
+            <p role="alert" aria-live="assertive" className="text-sm text-destructive min-h-[1.25rem]">
+              {error ?? ''}
+            </p>
+            <Button type="submit" disabled={loading} className="w-full h-11">
               {loading ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
-          <p className="mt-4 text-sm text-center text-muted-foreground">
-            No account?{' '}
-            <Link href="/signup" className="underline text-foreground">
-              Sign up
+
+          <p className="text-sm text-center text-muted-foreground">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="font-medium text-foreground underline underline-offset-4">
+              Create one
             </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

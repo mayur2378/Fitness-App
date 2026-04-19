@@ -1,5 +1,6 @@
 // lib/types.ts
 export type Goal = 'lose' | 'gain' | 'maintain'
+export type Sex = 'male' | 'female'
 export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced'
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -9,6 +10,7 @@ export type PlanStatus = 'proposed' | 'active' | 'archived'
 export interface Profile {
   id: string
   user_id: string
+  sex: Sex
   age: number
   weight_kg: number
   height_cm: number
