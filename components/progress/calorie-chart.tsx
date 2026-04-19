@@ -39,7 +39,7 @@ export default function CalorieChart({ data, target }: Props) {
           formatter={(v: number) => [`${v} kcal`, 'Calories']}
           labelFormatter={l => `Date: ${l}`}
         />
-        {target && (
+        {target !== null && (
           <ReferenceLine
             y={target}
             stroke="oklch(68% 0.2 40)"
