@@ -116,3 +116,21 @@ export interface WorkoutLogPayload {
   exercises_logged: ExerciseLog[]
   notes: string
 }
+
+export interface WeightEntry {
+  id: string
+  user_id: string
+  date: string
+  weight_kg: number
+  created_at: string
+}
+
+export interface CalorieEntry {
+  date: string
+  calories: number
+}
+
+export interface WorkoutEntry {
+  date: string
+  completed: boolean
+}
