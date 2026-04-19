@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { WorkoutPlanItem, ExerciseLog, WorkoutLogPayload } from '@/lib/types'
 
 interface Props {
@@ -22,6 +22,29 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
   const [notes, setNotes] = useState('')
 
   const dayLabel = item.day_of_week.charAt(0).toUpperCase() + item.day_of_week.slice(1)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setActuals(item.exercises.map(e => ({
+      name: e.name,
+      actual_sets: e.sets,
+      actual_reps: e.reps,
+      actual_weight_kg: e.weight_kg,
+    })))
+    setNotes('')
+    setMode('view')
+  }, [item.id])
+
+  const handleCancel = () => {
+    setActuals(item.exercises.map(e => ({
+      name: e.name,
+      actual_sets: e.sets,
+      actual_reps: e.reps,
+      actual_weight_kg: e.weight_kg,
+    })))
+    setNotes('')
+    setMode('view')
+  }
 
   const handleSave = () => {
     onSave({
@@ -134,7 +157,7 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setMode('view')}
+              onClick={handleCancel}
               className="flex-1 rounded-lg border text-sm font-semibold py-2 hover:bg-muted transition-colors"
             >
               Cancel

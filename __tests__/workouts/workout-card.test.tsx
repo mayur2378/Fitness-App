@@ -72,4 +72,26 @@ describe('WorkoutCard', () => {
     const saveBtn = screen.getByRole('button', { name: /saving/i })
     expect(saveBtn).toBeDisabled()
   })
+
+  it('cancel resets inputs to target values', () => {
+    render(<WorkoutCard item={mockItem} isLogged={false} onSave={jest.fn()} isSaving={false} />)
+    fireEvent.click(screen.getByRole('button', { name: /log workout/i }))
+    fireEvent.change(screen.getByLabelText('Bench Press Sets'), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+    fireEvent.click(screen.getByRole('button', { name: /log workout/i }))
+    expect(screen.getByLabelText('Bench Press Sets')).toHaveValue(3)
+  })
+
+  it('modifying inputs updates the save payload', () => {
+    const mockSave = jest.fn()
+    render(<WorkoutCard item={mockItem} isLogged={false} onSave={mockSave} isSaving={false} />)
+    fireEvent.click(screen.getByRole('button', { name: /log workout/i }))
+    fireEvent.change(screen.getByLabelText('Bench Press Sets'), { target: { value: '5' } })
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({
+      exercises_logged: expect.arrayContaining([
+        expect.objectContaining({ name: 'Bench Press', actual_sets: 5 }),
+      ]),
+    }))
+  })
 })
