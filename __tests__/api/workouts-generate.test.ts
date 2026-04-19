@@ -41,7 +41,10 @@ const MOCK_PLAN_DAYS = [
 
 function makeMockSupabase(itemsInsertError: { message: string } | null = null) {
   const mockPlan = { id: 'plan-uuid', user_id: 'uid-1', week_start_date: '2026-04-21', status: 'active', created_at: '' }
-  return {
+  const mockDelete = jest.fn().mockReturnValue({
+    eq: jest.fn().mockResolvedValue({ error: null }),
+  })
+  const supabase = {
     auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'uid-1' } }, error: null }) },
     from: jest.fn().mockImplementation((table: string) => {
       if (table === 'profiles') {
@@ -67,9 +70,7 @@ function makeMockSupabase(itemsInsertError: { message: string } | null = null) {
               }),
             }),
           }),
-          delete: jest.fn().mockReturnValue({
-            eq: jest.fn().mockResolvedValue({ error: null }),
-          }),
+          delete: mockDelete,
         }
       }
       if (table === 'workout_plan_items') {
@@ -79,7 +80,9 @@ function makeMockSupabase(itemsInsertError: { message: string } | null = null) {
       }
       return {}
     }),
+    _mockDelete: mockDelete,
   }
+  return supabase
 }
 
 beforeEach(() => jest.clearAllMocks())
@@ -132,10 +135,12 @@ describe('POST /api/workouts/generate', () => {
   })
 
   it('returns 500 and deletes plan when item insert fails', async () => {
-    mockCreateClient.mockResolvedValue(makeMockSupabase({ message: 'insert failed' }) as never)
+    const mockSupabase = makeMockSupabase({ message: 'insert failed' })
+    mockCreateClient.mockResolvedValue(mockSupabase as never)
     mockCallClaude.mockResolvedValueOnce(JSON.stringify(MOCK_PLAN_DAYS))
     const res = await POST(new Request('http://localhost/api/workouts/generate', { method: 'POST' }))
     expect(res.status).toBe(500)
     expect(await res.json()).toEqual({ error: 'Workout plan generation failed — try again.' })
+    expect(mockSupabase._mockDelete).toHaveBeenCalled()
   })
 })

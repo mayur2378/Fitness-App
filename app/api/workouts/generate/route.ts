@@ -99,12 +99,16 @@ Output this exact structure with no other text:
     return NextResponse.json({ error: 'Workout plan generation failed — try again.' }, { status: 500 })
   }
 
-  await supabase
+  const { error: archiveError } = await supabase
     .from('workout_plans')
     .update({ status: 'archived' })
     .eq('user_id', user.id)
     .eq('status', 'active')
     .neq('id', plan.id)
+
+  if (archiveError) {
+    console.error('[workouts/generate] archive step failed (non-fatal):', archiveError)
+  }
 
   return NextResponse.json({ plan, items })
 }
