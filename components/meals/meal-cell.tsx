@@ -17,7 +17,7 @@ export default function MealCell({ item, isEaten, onToggleEaten, onSwap, isSwapp
       </p>
 
       <div className="flex items-center justify-between">
-        <span className={`text-xs font-bold ${isEaten ? 'text-muted-foreground' : 'text-primary'}`}>
+        <span className={`text-xs font-bold font-data ${isEaten ? 'text-muted-foreground' : 'text-primary'}`}>
           {item.calories} kcal
         </span>
       </div>
@@ -29,7 +29,7 @@ export default function MealCell({ item, isEaten, onToggleEaten, onSwap, isSwapp
           { label: 'F', value: item.fat_g },
         ].map(({ label, value }) => (
           <span key={label} className="inline-flex items-center gap-0.5 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-            <span className="font-bold">{label}</span>{value}g
+            <span className={`font-bold ${isEaten ? '' : 'text-primary'}`}>{label}</span>{value}g
           </span>
         ))}
       </div>
@@ -42,7 +42,7 @@ export default function MealCell({ item, isEaten, onToggleEaten, onSwap, isSwapp
           className={`flex-1 rounded text-[10px] font-semibold py-1 transition-colors ${
             isEaten
               ? 'bg-primary/10 text-primary hover:bg-primary/20'
-              : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              : 'bg-primary/10 text-primary hover:bg-primary/20'
           }`}
         >
           {isEaten ? '✓ Eaten' : 'Log meal'}

@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, Sex, Goal, ActivityLevel, ExperienceLevel } from '@/lib/types'
 
-const GOALS: { value: Goal; label: string; description: string; icon: string }[] = [
-  { value: 'lose', label: 'Lose weight', description: 'Calorie deficit', icon: '🔥' },
-  { value: 'maintain', label: 'Maintain', description: 'Balanced calories', icon: '⚖️' },
-  { value: 'gain', label: 'Gain muscle', description: 'Calorie surplus', icon: '💪' },
+const GOALS: { value: Goal; label: string; description: string }[] = [
+  { value: 'lose', label: 'Lose weight', description: 'Calorie deficit' },
+  { value: 'maintain', label: 'Maintain', description: 'Balanced calories' },
+  { value: 'gain', label: 'Gain muscle', description: 'Calorie surplus' },
 ]
 
 const ACTIVITY_OPTIONS: { value: ActivityLevel; label: string; detail: string }[] = [
@@ -132,12 +132,11 @@ export default function ProfileForm({ profile: initialProfile }: Props) {
       <div className="space-y-1.5">
         <Label>Goal</Label>
         <div className="space-y-2 pt-1">
-          {GOALS.map(({ value, label, description, icon }) => (
+          {GOALS.map(({ value, label, description }) => (
             <button key={value} type="button" onClick={() => setGoal(value)}
               className={`w-full flex items-center gap-4 rounded-lg border px-4 py-3 text-left transition-colors ${
                 goal === value ? 'border-primary bg-primary/5' : 'border-input hover:border-primary/30 hover:bg-muted/40'
               }`}>
-              <span className="text-xl shrink-0">{icon}</span>
               <div>
                 <p className={`text-sm font-semibold ${goal === value ? 'text-primary' : ''}`}>{label}</p>
                 <p className="text-xs text-muted-foreground">{description}</p>
@@ -210,11 +209,11 @@ export default function ProfileForm({ profile: initialProfile }: Props) {
       </div>
 
       {success && !showRecalculate && !newTargets && (
-        <p className="text-sm text-green-600">Profile saved.</p>
+        <p className="text-sm text-primary">Profile saved.</p>
       )}
 
       {showRecalculate && (
-        <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
+        <div className="rounded-lg border bg-card border-primary/20 border-l-2 border-l-primary p-3 space-y-2">
           <p className="text-sm font-medium">Your calorie targets may have changed. Recalculate?</p>
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={handleRecalculate}>Yes, recalculate</Button>

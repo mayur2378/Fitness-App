@@ -67,7 +67,7 @@ export default function WorkoutsClient({ activePlan, items, loggedItemIds, userI
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold">Workouts</h1>
+        <h1 className="text-2xl font-display font-bold">Workouts</h1>
         <Button onClick={handleGenerate} disabled={isGenerating} size="sm">
           {isGenerating ? 'Generating…' : activePlan ? 'Regenerate plan' : 'Generate workout plan'}
         </Button>
@@ -87,7 +87,7 @@ export default function WorkoutsClient({ activePlan, items, loggedItemIds, userI
             const item = itemByDay[key]
             if (!item) {
               return (
-                <div key={key} className="rounded-xl border border-dashed p-4 flex items-center justify-center min-h-[120px]">
+                <div key={key} className="rounded-xl border border-dashed p-4 flex items-center justify-center min-h-[120px] opacity-40">
                   <div className="text-center">
                     <p className="text-xs font-semibold text-muted-foreground uppercase">{label}</p>
                     <p className="text-xs text-muted-foreground mt-1">Rest</p>

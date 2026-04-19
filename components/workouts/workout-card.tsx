@@ -68,7 +68,10 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{dayLabel}</p>
             <p className="font-bold text-sm">{item.name}</p>
           </div>
-          <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+          <span
+            className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full"
+            style={{ boxShadow: '0 0 6px oklch(68% 0.2 40 / 0.3)' }}
+          >
             ✓ Completed
           </span>
         </div>
@@ -76,7 +79,7 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
           {item.exercises.map((e, i) => (
             <li key={i} className="text-xs text-muted-foreground">
               <span className="font-medium text-foreground">{e.name}</span>
-              {' · '}{e.sets}×{e.reps} · {e.weight_kg}kg
+              {' · '}<span className="font-data">{e.sets}×{e.reps} · {e.weight_kg}kg</span>
             </li>
           ))}
         </ul>
@@ -97,7 +100,7 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
             {item.exercises.map((e, i) => (
               <li key={i} className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">{e.name}</span>
-                {' · '}{e.sets}×{e.reps} · {e.weight_kg}kg
+                {' · '}<span className="font-data">{e.sets}×{e.reps} · {e.weight_kg}kg</span>
               </li>
             ))}
           </ul>
@@ -114,7 +117,7 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
           <div className="space-y-3">
             {actuals.map((e, idx) => (
               <div key={idx} className="space-y-1">
-                <p className="text-xs font-semibold">{e.name}</p>
+                <p className="text-xs font-semibold text-foreground">{e.name}</p>
                 <div className="flex gap-2">
                   {(
                     [
@@ -138,7 +141,7 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
                         value={e[field] as number}
                         onChange={ev => updateActual(idx, field, Number(ev.target.value))}
                         aria-label={`${e.name} ${label}`}
-                        className="w-full rounded border border-input bg-background px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-ring"
+                        className="w-full rounded border border-input bg-background px-2 py-1 text-xs text-center font-data focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                     </div>
                   ))}

@@ -62,7 +62,7 @@ export default function SecurityForm({ currentEmail }: Props) {
     <div className="space-y-8">
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold">Email address</h3>
+          <h3 className="text-sm font-display font-semibold">Email address</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Current: <span>{currentEmail}</span></p>
         </div>
         <form onSubmit={handleEmailUpdate} className="space-y-3">
@@ -79,7 +79,7 @@ export default function SecurityForm({ currentEmail }: Props) {
               autoComplete="email"
             />
           </div>
-          {emailSuccess && <p className="text-sm text-green-600">Email updated — check your inbox to confirm.</p>}
+          {emailSuccess && <p className="text-sm text-primary">Email updated — check your inbox to confirm.</p>}
           {emailError && <p className="text-sm text-destructive">{emailError}</p>}
           <Button type="submit" disabled={emailLoading} size="sm">
             {emailLoading ? 'Updating…' : 'Update email'}
@@ -88,7 +88,7 @@ export default function SecurityForm({ currentEmail }: Props) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Password</h3>
+        <h3 className="text-sm font-display font-semibold">Password</h3>
         <form onSubmit={handlePasswordUpdate} className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="new-password">New password</Label>
@@ -117,7 +117,7 @@ export default function SecurityForm({ currentEmail }: Props) {
               autoComplete="new-password"
             />
           </div>
-          {passwordSuccess && <p className="text-sm text-green-600">Password updated successfully.</p>}
+          {passwordSuccess && <p className="text-sm text-primary">Password updated successfully.</p>}
           {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
           <Button type="submit" disabled={passwordLoading} size="sm">
             {passwordLoading ? 'Updating…' : 'Update password'}

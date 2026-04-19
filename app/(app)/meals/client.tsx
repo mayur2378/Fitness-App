@@ -122,7 +122,7 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="text-2xl font-bold">Meal Plan</h1>
+        <h1 className="text-2xl font-bold font-display">Meal Plan</h1>
         <Button onClick={handleGenerate} disabled={isGenerating} size="sm">
           {isGenerating ? 'Generating…' : activePlan ? 'Regenerate plan' : 'Generate meal plan'}
         </Button>
@@ -133,16 +133,16 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
       </p>
 
       {targets && (
-        <div className="rounded-lg border bg-card p-3 space-y-2 text-sm">
+        <div className="rounded-lg border border-primary/20 border-l-2 border-l-primary bg-card p-3 space-y-2 text-sm">
           <div className="flex items-center justify-between flex-wrap gap-x-4 gap-y-1">
             <span className="font-medium">Daily calorie budget</span>
-            <span className="text-lg font-bold text-primary">{targets.daily_calories} kcal</span>
+            <span className="text-lg font-bold text-primary"><span className="font-data">{targets.daily_calories}</span> kcal</span>
           </div>
           <div className="flex gap-4 text-xs text-muted-foreground flex-wrap">
-            <span>Protein <span className="font-medium text-foreground">{targets.protein_g}g</span></span>
-            <span>Carbs <span className="font-medium text-foreground">{targets.carbs_g}g</span></span>
-            <span>Fat <span className="font-medium text-foreground">{targets.fat_g}g</span></span>
-            <span className="ml-auto">BMI <span className="font-medium text-foreground">{targets.bmi}</span> ({targets.bmi_category})</span>
+            <span>Protein <span className="font-medium text-foreground font-data">{targets.protein_g}</span>g</span>
+            <span>Carbs <span className="font-medium text-foreground font-data">{targets.carbs_g}</span>g</span>
+            <span>Fat <span className="font-medium text-foreground font-data">{targets.fat_g}</span>g</span>
+            <span className="ml-auto">BMI <span className="font-medium text-foreground font-data">{targets.bmi}</span> ({targets.bmi_category})</span>
           </div>
         </div>
       )}
@@ -156,13 +156,13 @@ export default function MealsClient({ activePlan, items: initialItems, eatenItem
           <div className="grid min-w-[640px]" style={{ gridTemplateColumns: '70px repeat(7, 1fr)', gap: '4px' }}>
             <div />
             {DAYS.map(d => (
-              <div key={d.key} className="text-center text-xs font-semibold py-1 text-muted-foreground">
+              <div key={d.key} className="text-center text-xs font-bold tracking-widest uppercase py-1 text-muted-foreground">
                 {d.label}
               </div>
             ))}
             {MEAL_TYPES.map(mt => (
               <React.Fragment key={mt}>
-                <div className="text-xs font-medium text-muted-foreground capitalize pt-3 pr-1">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground pt-3 pr-1">
                   {mt}
                 </div>
                 {DAYS.map(d => {

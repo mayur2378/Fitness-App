@@ -20,13 +20,13 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-xl space-y-10">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-display font-bold">Settings</h1>
         <p className="text-muted-foreground text-sm mt-1">Manage your profile and account</p>
       </div>
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-base font-semibold">Profile</h2>
+          <h2 className="text-base font-display font-semibold">Profile</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Used to personalise your meal and workout plans
           </p>
@@ -34,11 +34,11 @@ export default async function SettingsPage() {
         <ProfileForm profile={profile} />
       </section>
 
-      <div className="border-t" />
+      <div className="border-t border-border" />
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-base font-semibold">Security</h2>
+          <h2 className="text-base font-display font-semibold">Security</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Update your login credentials</p>
         </div>
         <SecurityForm currentEmail={user.email ?? ''} />
