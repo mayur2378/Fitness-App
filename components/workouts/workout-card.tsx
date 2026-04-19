@@ -158,7 +158,8 @@ export default function WorkoutCard({ item, isLogged, onSave, isSaving }: Props)
             <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 rounded-lg border text-sm font-semibold py-2 hover:bg-muted transition-colors"
+              disabled={isSaving}
+              className="flex-1 rounded-lg border text-sm font-semibold py-2 hover:bg-muted transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
