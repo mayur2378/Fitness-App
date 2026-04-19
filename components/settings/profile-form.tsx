@@ -90,7 +90,11 @@ export default function ProfileForm({ profile: initialProfile }: Props) {
   const handleRecalculate = async () => {
     setShowRecalculate(false)
     const res = await fetch('/api/calorie/calculate', { method: 'POST' })
-    if (res.ok) setNewTargets(await res.json())
+    if (res.ok) {
+      setNewTargets(await res.json())
+    } else {
+      setError('Could not recalculate targets — please try again.')
+    }
   }
 
   return (
@@ -111,13 +115,13 @@ export default function ProfileForm({ profile: initialProfile }: Props) {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { id: 'age', label: 'Age', value: age, onChange: (v: number | '') => setAge(v), placeholder: '30' },
-          { id: 'weight', label: 'Weight (kg)', value: weightKg, onChange: (v: number | '') => setWeightKg(v), placeholder: '70' },
-          { id: 'height', label: 'Height (cm)', value: heightCm, onChange: (v: number | '') => setHeightCm(v), placeholder: '170' },
-        ].map(({ id, label, value, onChange, placeholder }) => (
+          { id: 'age', label: 'Age', value: age, onChange: (v: number | '') => setAge(v), placeholder: '30', step: '1' },
+          { id: 'weight', label: 'Weight (kg)', value: weightKg, onChange: (v: number | '') => setWeightKg(v), placeholder: '70', step: '0.1' },
+          { id: 'height', label: 'Height (cm)', value: heightCm, onChange: (v: number | '') => setHeightCm(v), placeholder: '170', step: '0.1' },
+        ].map(({ id, label, value, onChange, placeholder, step }) => (
           <div key={id} className="space-y-1.5">
             <Label htmlFor={id}>{label}</Label>
-            <Input id={id} type="number" step="0.1" placeholder={placeholder} className="h-11"
+            <Input id={id} type="number" step={step} placeholder={placeholder} className="h-11"
               value={value}
               onChange={e => onChange(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber)}
             />

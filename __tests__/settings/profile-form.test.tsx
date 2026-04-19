@@ -64,8 +64,8 @@ describe('ProfileForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /save changes/i }))
     await waitFor(() => {
       expect(screen.queryByText(/calorie targets may have changed/i)).not.toBeInTheDocument()
+      expect(screen.getByText(/profile saved/i)).toBeInTheDocument()
     })
-    expect(screen.getByText(/profile saved/i)).toBeInTheDocument()
   })
 
   it('shows error message when save fails', async () => {
