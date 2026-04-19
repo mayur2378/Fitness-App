@@ -7,7 +7,6 @@ jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   BarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>,
   Bar: () => null,
-  Cell: () => null,
   XAxis: () => null,
   YAxis: () => null,
   Tooltip: () => null,

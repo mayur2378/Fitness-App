@@ -24,7 +24,7 @@ export default function WorkoutChart({ data }: Props) {
   const byDate = new Map<string, DayEntry>()
   for (const entry of data) {
     const existing = byDate.get(entry.date) ?? { date: entry.date, completed: 0, missed: 0 }
-    if (entry.completed) existing.completed++
+    if (entry.completed === true) existing.completed++
     else existing.missed++
     byDate.set(entry.date, existing)
   }
