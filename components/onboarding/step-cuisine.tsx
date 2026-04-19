@@ -41,14 +41,19 @@ export default function StepCuisine({ onSubmit, defaultValues }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold">Food preferences</h2>
-      <div className="space-y-1">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <h2 className="text-xl font-bold">Food preferences</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">We&apos;ll tailor your meal plans to these</p>
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="cuisine">Cuisine preference</Label>
         <Input
           id="cuisine"
           type="text"
-          placeholder="e.g. Indian, Mediterranean"
+          placeholder="e.g. Indian, Mediterranean, Asian"
+          className="h-11"
           value={cuisine}
           onChange={e => setCuisine(e.target.value)}
         />
@@ -56,19 +61,22 @@ export default function StepCuisine({ onSubmit, defaultValues }: Props) {
           <p className="text-sm text-destructive">{errors.cuisine_preference}</p>
         )}
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="restrictions">Dietary restrictions (comma-separated, optional)</Label>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="restrictions">Dietary restrictions <span className="text-muted-foreground font-normal">(optional)</span></Label>
         <Input
           id="restrictions"
           type="text"
-          placeholder="e.g. no fish, no pork"
+          placeholder="e.g. no fish, vegetarian, no pork"
+          className="h-11"
           value={restrictions}
           onChange={e => setRestrictions(e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">Leave blank if none</p>
+        <p className="text-xs text-muted-foreground">Comma-separated. Leave blank if none.</p>
       </div>
-      <Button type="submit" disabled={loading} className="w-full">
-        {loading ? 'Setting up your plan…' : 'Finish setup'}
+
+      <Button type="submit" disabled={loading} className="w-full h-11">
+        {loading ? 'Creating your profile…' : 'Finish setup'}
       </Button>
     </form>
   )

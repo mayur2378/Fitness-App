@@ -26,38 +26,58 @@ export default function StepGoal({ onNext, defaultValues }: Props) {
     onNext({ goal, target_weight_kg: Number(targetWeight) })
   }
 
+  const GOALS: { value: Goal; label: string; description: string; icon: string }[] = [
+    { value: 'lose', label: 'Lose weight', description: 'Calorie deficit + meal plans', icon: '🔥' },
+    { value: 'maintain', label: 'Maintain', description: 'Balanced calorie target', icon: '⚖️' },
+    { value: 'gain', label: 'Gain muscle', description: 'Calorie surplus for growth', icon: '💪' },
+  ]
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold">Your goal</h2>
-      <div className="space-y-1">
-        <Label htmlFor="goal">Goal</Label>
-        <select
-          id="goal"
-          value={goal}
-          onChange={e => setGoal(e.target.value as Goal)}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="lose">Lose weight</option>
-          <option value="gain">Gain muscle</option>
-          <option value="maintain">Maintain / general health</option>
-        </select>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <h2 className="text-xl font-bold">Your goal</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">This shapes your calorie deficit or surplus</p>
       </div>
-      <div className="space-y-1">
-        <p className="text-sm font-medium leading-none">How much do you want to weigh? (kg)</p>
+
+      <div className="space-y-2">
+        {GOALS.map(({ value, label, description, icon }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setGoal(value)}
+            className={`w-full flex items-center gap-4 rounded-lg border px-4 py-3 text-left transition-colors ${
+              goal === value
+                ? 'border-primary bg-primary/5'
+                : 'border-input hover:border-primary/30 hover:bg-muted/40'
+            }`}
+          >
+            <span className="text-2xl shrink-0">{icon}</span>
+            <div>
+              <p className={`text-sm font-semibold ${goal === value ? 'text-primary' : ''}`}>{label}</p>
+              <p className="text-xs text-muted-foreground">{description}</p>
+            </div>
+            <div className={`ml-auto w-4 h-4 rounded-full border-2 shrink-0 transition-colors ${
+              goal === value ? 'border-primary bg-primary' : 'border-muted-foreground'
+            }`} />
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="target-weight">Target weight (kg)</Label>
         <Input
           id="target-weight"
           type="number"
           step="0.1"
-          aria-label="Target weight (kg)"
+          placeholder="e.g. 65"
+          className="h-11"
           value={targetWeight}
-          onChange={e => {
-            const val = e.target.valueAsNumber
-            setTargetWeight(isNaN(val) ? '' : val)
-          }}
+          onChange={e => setTargetWeight(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber)}
         />
         {errors.target_weight_kg && <p className="text-sm text-destructive">{errors.target_weight_kg}</p>}
       </div>
-      <Button type="submit" className="w-full">Next</Button>
+
+      <Button type="submit" className="w-full h-11">Continue</Button>
     </form>
   )
 }
