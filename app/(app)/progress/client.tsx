@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import CalorieChart from '@/components/progress/calorie-chart'
 import WorkoutChart from '@/components/progress/workout-chart'
@@ -49,8 +49,10 @@ export default function ProgressClient({
   const [isSavingWeight, setIsSavingWeight] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = useMemo(() => createClient(), [])
+  const fetchId = useRef(0)
 
   const handleRangeChange = async (newRange: RangeKey) => {
+    const thisId = ++fetchId.current
     setRange(newRange)
     setError(null)
     const today = new Date().toISOString().split('T')[0]
@@ -61,6 +63,8 @@ export default function ProgressClient({
       supabase.from('workout_logs').select('date, completed').eq('user_id', userId).gte('date', startDate).lte('date', today),
       supabase.from('weight_entries').select('id, user_id, date, weight_kg, created_at').eq('user_id', userId).gte('date', startDate).lte('date', today).order('date'),
     ])
+
+    if (thisId !== fetchId.current) return
 
     if (calResult.error !== null || workoutResult.error !== null || weightResult.error !== null) {
       setError('Could not load data — please try again.')
