@@ -29,40 +29,20 @@ interface MealCardProps {
   planId: string
   items: MealPlanItem[]
   weekStart: string
+  reactivating: string | null
+  onReactivate: (type: 'meal' | 'workout', planId: string, weekStart: string) => Promise<void>
 }
 
 interface WorkoutCardProps {
   planId: string
   items: WorkoutPlanItem[]
   weekStart: string
+  reactivating: string | null
+  onReactivate: (type: 'meal' | 'workout', planId: string, weekStart: string) => Promise<void>
 }
 
-function MealPlanCard({ planId, items, weekStart }: MealCardProps) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
-
-  const handleReactivate = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/history/reactivate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'meal', planId, weekStart }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Reactivation failed')
-      } else {
-        setDone(true)
-      }
-    } catch {
-      setError('Network error — please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+function MealPlanCard({ planId, items, weekStart, reactivating, onReactivate }: MealCardProps) {
+  const isLoading = reactivating === planId
 
   return (
     <div className="flex-1 min-w-0 rounded-xl border border-border bg-card p-4 space-y-3">
@@ -80,50 +60,20 @@ function MealPlanCard({ planId, items, weekStart }: MealCardProps) {
         ))}
       </ul>
 
-      {error && (
-        <p role="alert" className="text-xs text-destructive">
-          {error}
-        </p>
-      )}
-
       <button
         type="button"
-        onClick={handleReactivate}
-        disabled={loading || done}
+        onClick={() => onReactivate('meal', planId, weekStart)}
+        disabled={isLoading}
         className="w-full rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {done ? 'Activated!' : loading ? 'Re-activating…' : 'Re-activate'}
+        {isLoading ? 'Re-activating…' : 'Re-activate'}
       </button>
     </div>
   )
 }
 
-function WorkoutPlanCard({ planId, items, weekStart }: WorkoutCardProps) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
-
-  const handleReactivate = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/history/reactivate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'workout', planId, weekStart }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Reactivation failed')
-      } else {
-        setDone(true)
-      }
-    } catch {
-      setError('Network error — please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+function WorkoutPlanCard({ planId, items, weekStart, reactivating, onReactivate }: WorkoutCardProps) {
+  const isLoading = reactivating === planId
 
   return (
     <div className="flex-1 min-w-0 rounded-xl border border-border bg-card p-4 space-y-3">
@@ -140,19 +90,13 @@ function WorkoutPlanCard({ planId, items, weekStart }: WorkoutCardProps) {
         ))}
       </ul>
 
-      {error && (
-        <p role="alert" className="text-xs text-destructive">
-          {error}
-        </p>
-      )}
-
       <button
         type="button"
-        onClick={handleReactivate}
-        disabled={loading || done}
+        onClick={() => onReactivate('workout', planId, weekStart)}
+        disabled={isLoading}
         className="w-full rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {done ? 'Activated!' : loading ? 'Re-activating…' : 'Re-activate'}
+        {isLoading ? 'Re-activating…' : 'Re-activate'}
       </button>
     </div>
   )
@@ -160,8 +104,15 @@ function WorkoutPlanCard({ planId, items, weekStart }: WorkoutCardProps) {
 
 // ─── week row ─────────────────────────────────────────────────────────────────
 
-function WeekRow({ week }: { week: HistoryWeek }) {
-  const [open, setOpen] = useState(false)
+interface WeekRowProps {
+  week: HistoryWeek
+  expanded: boolean
+  onToggle: (weekStart: string) => void
+  reactivating: string | null
+  onReactivate: (type: 'meal' | 'workout', planId: string, weekStart: string) => Promise<void>
+}
+
+function WeekRow({ week, expanded, onToggle, reactivating, onReactivate }: WeekRowProps) {
   const label = formatWeekRange(week.weekStart)
 
   return (
@@ -170,8 +121,8 @@ function WeekRow({ week }: { week: HistoryWeek }) {
       <button
         type="button"
         aria-label={label}
-        aria-expanded={open}
-        onClick={() => setOpen(v => !v)}
+        aria-expanded={expanded}
+        onClick={() => onToggle(week.weekStart)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/[0.03] transition-colors group"
       >
         <span className="font-display font-semibold text-sm text-foreground">{label}</span>
@@ -184,7 +135,7 @@ function WeekRow({ week }: { week: HistoryWeek }) {
       </button>
 
       {/* expandable body */}
-      {open && (
+      {expanded && (
         <div className="border-t border-border px-5 py-4">
           {!week.mealPlan && !week.workoutPlan ? (
             <p className="text-xs text-muted-foreground">No plan data for this week.</p>
@@ -195,6 +146,8 @@ function WeekRow({ week }: { week: HistoryWeek }) {
                   planId={week.mealPlan.id}
                   items={week.mealPlan.items}
                   weekStart={week.weekStart}
+                  reactivating={reactivating}
+                  onReactivate={onReactivate}
                 />
               )}
               {week.workoutPlan && (
@@ -202,6 +155,8 @@ function WeekRow({ week }: { week: HistoryWeek }) {
                   planId={week.workoutPlan.id}
                   items={week.workoutPlan.items}
                   weekStart={week.weekStart}
+                  reactivating={reactivating}
+                  onReactivate={onReactivate}
                 />
               )}
             </div>
@@ -223,12 +178,53 @@ function ChevronIcon() {
 // ─── main export ──────────────────────────────────────────────────────────────
 
 export default function HistoryClient({
-  weeks,
+  weeks: initialWeeks,
   userId: _userId,
 }: {
   weeks: HistoryWeek[]
   userId: string
 }) {
+  const [weeks, setWeeks] = useState<HistoryWeek[]>(initialWeeks)
+  const [expandedWeek, setExpandedWeek] = useState<string | null>(null)
+  const [reactivating, setReactivating] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleToggle = (weekStart: string) => {
+    setExpandedWeek(prev => (prev === weekStart ? null : weekStart))
+  }
+
+  const handleReactivate = async (type: 'meal' | 'workout', planId: string, weekStart: string) => {
+    setReactivating(planId)
+    setError(null)
+    try {
+      const res = await fetch('/api/history/reactivate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, planId, weekStart }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Reactivation failed')
+      } else {
+        setWeeks(prev =>
+          prev
+            .map(w => {
+              if (w.weekStart !== weekStart) return w
+              const updated = { ...w }
+              if (type === 'meal') delete updated.mealPlan
+              else delete updated.workoutPlan
+              return updated
+            })
+            .filter(w => w.mealPlan !== undefined || w.workoutPlan !== undefined)
+        )
+      }
+    } catch {
+      setError('Network error — please try again.')
+    } finally {
+      setReactivating(null)
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-3xl">
       {/* page header */}
@@ -238,6 +234,13 @@ export default function HistoryClient({
           {weeks.length} {weeks.length === 1 ? 'week' : 'weeks'} archived
         </span>
       </div>
+
+      {/* error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
       {/* empty state */}
       {weeks.length === 0 ? (
@@ -249,7 +252,14 @@ export default function HistoryClient({
       ) : (
         <div className="space-y-2">
           {weeks.map(week => (
-            <WeekRow key={week.weekStart} week={week} />
+            <WeekRow
+              key={week.weekStart}
+              week={week}
+              expanded={expandedWeek === week.weekStart}
+              onToggle={handleToggle}
+              reactivating={reactivating}
+              onReactivate={handleReactivate}
+            />
           ))}
         </div>
       )}

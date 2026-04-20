@@ -140,4 +140,23 @@ describe('HistoryClient', () => {
 
     resolveReactivate({ ok: true, json: jest.fn().mockResolvedValue({ success: true }) })
   })
+
+  it('removes reactivated meal plan from local state on success', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ success: true }),
+    })
+
+    render(<HistoryClient weeks={MOCK_WEEKS} userId="uid-1" />)
+    fireEvent.click(screen.getByRole('button', { name: /Apr 7/ }))
+
+    const buttons = screen.getAllByRole('button', { name: 'Re-activate' })
+    fireEvent.click(buttons[0]) // meal plan button
+
+    await waitFor(() => {
+      // meal plan card should be gone, workout plan card should remain
+      expect(screen.queryByText('Meal Plan')).not.toBeInTheDocument()
+      expect(screen.getByText('Workout Plan')).toBeInTheDocument()
+    })
+  })
 })
