@@ -36,7 +36,7 @@ export default function CalorieChart({ data, target }: Props) {
           contentStyle={{ background: 'oklch(12% 0.006 240)', border: '1px solid oklch(20% 0.006 240)', borderRadius: 8, fontSize: 11 }}
           labelStyle={{ color: 'oklch(96% 0.003 60)' }}
           itemStyle={{ color: 'oklch(68% 0.2 40)' }}
-          formatter={(v: number) => [`${v} kcal`, 'Calories']}
+          formatter={(v) => [`${v} kcal`, 'Calories']}
           labelFormatter={l => `Date: ${l}`}
         />
         {target !== null && (
