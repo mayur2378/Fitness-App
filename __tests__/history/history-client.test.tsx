@@ -1,7 +1,5 @@
-jest.mock('@/lib/supabase/client')
-
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import HistoryClient from '@/app/(app)/history/client'
 import type { HistoryWeek } from '@/lib/types'
 
@@ -138,7 +136,9 @@ describe('HistoryClient', () => {
       expect(screen.getAllByRole('button', { name: /Re-activating/ })[0]).toBeDisabled()
     })
 
-    resolveReactivate({ ok: true, json: jest.fn().mockResolvedValue({ success: true }) })
+    await act(async () => {
+      resolveReactivate({ ok: true, json: jest.fn().mockResolvedValue({ success: true }) })
+    })
   })
 
   it('removes reactivated meal plan from local state on success', async () => {

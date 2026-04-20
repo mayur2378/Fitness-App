@@ -120,7 +120,6 @@ function WeekRow({ week, expanded, onToggle, reactivating, onReactivate }: WeekR
       {/* header toggle */}
       <button
         type="button"
-        aria-label={label}
         aria-expanded={expanded}
         onClick={() => onToggle(week.weekStart)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/[0.03] transition-colors group"
@@ -210,10 +209,8 @@ export default function HistoryClient({
           prev
             .map(w => {
               if (w.weekStart !== weekStart) return w
-              const updated = { ...w }
-              if (type === 'meal') delete updated.mealPlan
-              else delete updated.workoutPlan
-              return updated
+              if (type === 'meal') return { ...w, mealPlan: undefined }
+              return { ...w, workoutPlan: undefined }
             })
             .filter(w => w.mealPlan !== undefined || w.workoutPlan !== undefined)
         )
