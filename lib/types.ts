@@ -134,3 +134,9 @@ export interface WorkoutEntry {
   date: string
   completed: boolean
 }
+
+export interface HistoryWeek {
+  weekStart: string
+  mealPlan?: MealPlan & { items: MealPlanItem[] }
+  workoutPlan?: WorkoutPlan & { items: WorkoutPlanItem[] }
+}

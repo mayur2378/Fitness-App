@@ -36,6 +36,7 @@ const config: Config = {
         '**/__tests__/workouts/**/*.test.tsx',
         '**/__tests__/settings/**/*.test.tsx',
         '**/__tests__/progress/**/*.test.tsx',
+        '**/__tests__/history/**/*.test.tsx',
       ],
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
