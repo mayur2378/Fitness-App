@@ -96,7 +96,7 @@ const MOCK_WORKOUT_ITEMS = [
   { day_of_week: 'mon', name: 'Push Day', exercises: [{ name: 'Bench Press', sets: 3, reps: 10, weight_kg: 60 }] },
 ]
 
-function makeWorkoutSupabase(overrides: { planData?: object | null } = {}) {
+function makeWorkoutSupabase(overrides: { planData?: object | null; itemsInsertError?: object | null } = {}) {
   const newPlanInsert = jest.fn().mockReturnValue({
     select: jest.fn().mockReturnValue({
       single: jest.fn().mockResolvedValue({ data: MOCK_NEW_WORKOUT_PLAN, error: null }),
@@ -107,7 +107,13 @@ function makeWorkoutSupabase(overrides: { planData?: object | null } = {}) {
       eq: jest.fn().mockResolvedValue({ error: null }),
     }),
   })
-  const itemsInsert = jest.fn().mockResolvedValue({ error: null })
+  const itemsInsert = jest.fn().mockResolvedValue({
+    error: overrides.itemsInsertError ?? null,
+  })
+  // For rollback delete after items insert failure
+  const planDelete = jest.fn().mockReturnValue({
+    eq: jest.fn().mockResolvedValue({ error: null }),
+  })
 
   const supabase = {
     auth: {
@@ -128,6 +134,7 @@ function makeWorkoutSupabase(overrides: { planData?: object | null } = {}) {
           }),
           update: archiveUpdate,
           insert: newPlanInsert,
+          delete: planDelete,
         }
       }
       if (table === 'workout_plan_items') {
@@ -142,7 +149,7 @@ function makeWorkoutSupabase(overrides: { planData?: object | null } = {}) {
     }),
   }
 
-  return { supabase, newPlanInsert, archiveUpdate, itemsInsert }
+  return { supabase, newPlanInsert, archiveUpdate, itemsInsert, planDelete }
 }
 
 beforeEach(() => jest.clearAllMocks())
@@ -242,6 +249,30 @@ describe('POST /api/history/reactivate', () => {
     const body = await res.json()
     expect(body.error).toBe('Failed to copy plan items')
     // Verify rollback: the new plan should be deleted
+    expect(planDelete).toHaveBeenCalled()
+  })
+
+  it('returns 400 for malformed request body', async () => {
+    const { supabase } = makeMealSupabase()
+    mockCreateClient.mockResolvedValue(supabase as any)
+
+    const badRequest = new Request('http://localhost/api/history/reactivate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'not json',
+    })
+    const res = await POST(badRequest as any)
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.error).toBe('Invalid request body')
+  })
+
+  it('returns 500 and rolls back when workout items insert fails', async () => {
+    const { supabase, planDelete } = makeWorkoutSupabase({ itemsInsertError: { message: 'DB error' } })
+    mockCreateClient.mockResolvedValue(supabase as any)
+
+    const res = await POST(makeRequest({ type: 'workout', planId: 'wp-1' }) as any)
+    expect(res.status).toBe(500)
     expect(planDelete).toHaveBeenCalled()
   })
 })

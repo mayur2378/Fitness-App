@@ -77,7 +77,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       if (itemsError) {
         // Fix 2: Rollback newly created plan on items insert failure
         console.error('[history/reactivate] meal items insert failed:', itemsError)
-        await supabase.from('meal_plans').delete().eq('id', newPlan.id)
+        const { error: rollbackError } = await supabase.from('meal_plans').delete().eq('id', newPlan.id)
+        if (rollbackError) console.error('[history/reactivate] rollback failed:', rollbackError)
         return NextResponse.json({ error: 'Failed to copy plan items' }, { status: 500 })
       }
     }
@@ -136,7 +137,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (itemsError) {
       // Fix 2: Rollback newly created plan on items insert failure
       console.error('[history/reactivate] workout items insert failed:', itemsError)
-      await supabase.from('workout_plans').delete().eq('id', newPlan.id)
+      const { error: rollbackError } = await supabase.from('workout_plans').delete().eq('id', newPlan.id)
+      if (rollbackError) console.error('[history/reactivate] rollback failed:', rollbackError)
       return NextResponse.json({ error: 'Failed to copy plan items' }, { status: 500 })
     }
   }
