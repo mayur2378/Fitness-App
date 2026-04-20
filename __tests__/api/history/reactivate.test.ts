@@ -25,7 +25,11 @@ const MOCK_MEAL_ITEMS = [
   { day_of_week: 'mon', meal_type: 'breakfast', name: 'Oats', calories: 300, protein_g: 10, carbs_g: 50, fat_g: 5 },
 ]
 
-function makeMealSupabase(overrides: { planData?: object | null; newPlanError?: object | null } = {}) {
+function makeMealSupabase(overrides: {
+  planData?: object | null;
+  newPlanError?: object | null;
+  itemsInsertError?: object | null;
+} = {}) {
   const newPlanInsert = jest.fn().mockReturnValue({
     select: jest.fn().mockReturnValue({
       single: jest.fn().mockResolvedValue({
@@ -39,7 +43,13 @@ function makeMealSupabase(overrides: { planData?: object | null; newPlanError?: 
       eq: jest.fn().mockResolvedValue({ error: null }),
     }),
   })
-  const itemsInsert = jest.fn().mockResolvedValue({ error: null })
+  const itemsInsert = jest.fn().mockResolvedValue({
+    error: overrides.itemsInsertError ?? null,
+  })
+  // For rollback delete after items insert failure
+  const planDelete = jest.fn().mockReturnValue({
+    eq: jest.fn().mockResolvedValue({ error: null }),
+  })
 
   const supabase = {
     auth: {
@@ -60,6 +70,7 @@ function makeMealSupabase(overrides: { planData?: object | null; newPlanError?: 
           }),
           update: archiveUpdate,
           insert: newPlanInsert,
+          delete: planDelete,
         }
       }
       if (table === 'meal_plan_items') {
@@ -74,7 +85,7 @@ function makeMealSupabase(overrides: { planData?: object | null; newPlanError?: 
     }),
   }
 
-  return { supabase, newPlanInsert, archiveUpdate, itemsInsert }
+  return { supabase, newPlanInsert, archiveUpdate, itemsInsert, planDelete }
 }
 
 const MOCK_WORKOUT_PLAN = { id: 'wp-1', user_id: 'uid-1' }
@@ -85,7 +96,7 @@ const MOCK_WORKOUT_ITEMS = [
   { day_of_week: 'mon', name: 'Push Day', exercises: [{ name: 'Bench Press', sets: 3, reps: 10, weight_kg: 60 }] },
 ]
 
-function makeWorkoutSupabase() {
+function makeWorkoutSupabase(overrides: { planData?: object | null } = {}) {
   const newPlanInsert = jest.fn().mockReturnValue({
     select: jest.fn().mockReturnValue({
       single: jest.fn().mockResolvedValue({ data: MOCK_NEW_WORKOUT_PLAN, error: null }),
@@ -108,7 +119,10 @@ function makeWorkoutSupabase() {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
               eq: jest.fn().mockReturnValue({
-                maybeSingle: jest.fn().mockResolvedValue({ data: MOCK_WORKOUT_PLAN, error: null }),
+                maybeSingle: jest.fn().mockResolvedValue({
+                  data: overrides.planData !== undefined ? overrides.planData : MOCK_WORKOUT_PLAN,
+                  error: null,
+                }),
               }),
             }),
           }),
@@ -165,6 +179,17 @@ describe('POST /api/history/reactivate', () => {
     expect(res.status).toBe(404)
   })
 
+  // Fix 5: Add workout 404 test
+  it('returns 404 when workout plan not found', async () => {
+    const { supabase } = makeWorkoutSupabase({ planData: null })
+    mockCreateClient.mockResolvedValue(supabase as any)
+
+    const res = await POST(makeRequest({ type: 'workout', planId: 'nonexistent' }) as any)
+    expect(res.status).toBe(404)
+    const body = await res.json()
+    expect(body.error).toBe('Plan not found')
+  })
+
   it('archives current active meal plan and creates a new copy with current week start', async () => {
     const { supabase, archiveUpdate, newPlanInsert, itemsInsert } = makeMealSupabase()
     mockCreateClient.mockResolvedValue(supabase as any)
@@ -203,5 +228,20 @@ describe('POST /api/history/reactivate', () => {
         expect.objectContaining({ workout_plan_id: 'wp-new', day_of_week: 'mon' }),
       ])
     )
+  })
+
+  // Fix 6: Add items-insert failure test
+  it('returns 500 when items insert fails', async () => {
+    const { supabase, planDelete } = makeMealSupabase({
+      itemsInsertError: { message: 'DB error' },
+    })
+    mockCreateClient.mockResolvedValue(supabase as any)
+
+    const res = await POST(makeRequest({ type: 'meal', planId: 'mp-1' }) as any)
+    expect(res.status).toBe(500)
+    const body = await res.json()
+    expect(body.error).toBe('Failed to copy plan items')
+    // Verify rollback: the new plan should be deleted
+    expect(planDelete).toHaveBeenCalled()
   })
 })
